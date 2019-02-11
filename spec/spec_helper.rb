@@ -13,7 +13,11 @@
 # it.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
-require 'dotenv/load'
+ENV['APP_ENV'] ||= 'test'
+
+require 'dotenv'
+Dotenv.load('env.test', '.env.development', '.env')
+
 require 'rspec/collection_matchers'
 require "rspec/json_expectations"
 

@@ -2,7 +2,7 @@ db.createUser(
     {
         user: 'gamescripter-api-user',
         pwd: 'initial_password',
-        roles: [ "readWrite" ]
+        roles: [ "readWrite", "dbAdmin" ]
     }
 );
 db.getSiblingDB('test').createUser(

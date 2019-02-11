@@ -14,9 +14,9 @@ class Database
   APP_COLLECTIONS = %w[categories users scripts permissions].freeze
 
   def connect(host = DB_HOST,
-              database = DB_USERNAME,
-              username = DB_PASSWORD,
-              password = DB_DATABASE)
+              database = DB_DATABASE,
+              username = DB_USERNAME,
+              password = DB_PASSWORD)
     @client = Mongo::Client.new([host],
                                 auth_source: database,
                                 database: database,
@@ -59,6 +59,17 @@ class Database
     seq_key[:next_val]
   end
 
+
+  def mongo_id(id)
+    return id if id.instance_of?(BSON::ObjectId)
+
+    BSON::ObjectId.from_string(id)
+  end
+
+  def current_time()
+    DateTime.parse(DateTime.now.to_s)
+  end
+
   private
 
   def ensure_database
@@ -66,4 +77,42 @@ class Database
       @client[:categories].indexes.create_one(parent_id: 1)
     end
   end
+end
+
+class DBOperations
+
+  def initialize(db)
+    @database = db
+  end
+
+  def db
+    @database
+  end
+
+  def user_create(params)
+    unless params['created_at']
+      params['created_at'] = db.current_time
+    end
+    db.users.insert_one(params).inserted_id
+  end
+
+  def user_update(id, params)
+    db.users.update_one({_id: db.mongo_id(id)}, '$set' => params)
+  end
+
+  def user_one(id)
+    db.users.find(_id: db.mongo_id(id)).limit(1).first
+  end
+
+  def user_all
+    db.users.find
+  end
+
+  def user_check_uniques(filter = {})
+    db.users.find(filter)
+  end
+
+  private
+
+
 end
