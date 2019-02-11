@@ -5,9 +5,10 @@ services:
     volumes:
       - "./init_db:/docker-entrypoint-initdb.d"
       - "./tmp/data:/data/db"
+      - "./dbimport:/import"
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: "mongo-admin"
-      MONGO_INITDB_ROOT_PASSWORD: "pa$$word"
+      MONGO_INITDB_ROOT_PASSWORD: "admin_password"
       MONGO_INITDB_DATABASE: "gamescripter"
