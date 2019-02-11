@@ -13,6 +13,7 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'mongo'
 gem 'puma'
+gem 'dotenv'
 
 group :test do
   gem 'rspec'

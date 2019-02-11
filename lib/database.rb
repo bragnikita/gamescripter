@@ -1,32 +1,33 @@
+# frozen_string_literal: true
+
 require 'mongo'
 require 'singleton'
+
+DB_HOST = ENV['DB_HOST']
+DB_USERNAME = ENV['DB_USERNAME']
+DB_PASSWORD = ENV['DB_PASSWORD']
+DB_DATABASE = ENV['DB_DATABASE']
 
 class Database
   include Singleton
 
-  APP_COLLECTIONS = %w(categories users scripts)
+  APP_COLLECTIONS = %w[categories users scripts permissions].freeze
 
-  def initialize
-    # TODO try to load hostname and other parameters from config
-  end
-
-  def connect(host = '127.0.0.1:27017',
-              database = 'gamescripter',
-              username = 'gamescripter-api',
-              password = 'initial_password')
+  def connect(host = DB_HOST,
+              database = DB_USERNAME,
+              username = DB_PASSWORD,
+              password = DB_DATABASE)
     @client = Mongo::Client.new([host],
                                 auth_source: database,
                                 database: database,
                                 user: username,
                                 password: password,
-                                max_pool_size: 15,
+                                max_pool_size: 15
     )
     ensure_database
   end
 
-  def client
-    @client
-  end
+  attr_reader :client
 
   def categories
     @client[:categories]
@@ -34,6 +35,14 @@ class Database
 
   def scripts
     @client[:scripts]
+  end
+
+  def users
+    @client[:users]
+  end
+
+  def permissions
+    @client[:permissions]
   end
 
   def next_key_for(sequence_or_coll)
@@ -45,7 +54,7 @@ class Database
                end
     seq_key = @client[:sequences].find_one_and_update(
       {name: seq_name},
-      "$inc" => {next_val: 1}
+      '$inc' => {next_val: 1}
     )
     seq_key[:next_val]
   end
@@ -53,13 +62,8 @@ class Database
   private
 
   def ensure_database
-    APP_COLLECTIONS.each do |coll_name|
-      if @client[:sequences].find(name: coll_name).count == 0
-        @client[:sequences].insert_one(name: coll_name, next_val: 1)
-      end
-    end
-    if @client[:categories].indexes.get({parent_id: 1}).nil?
-      @client[:categories].indexes.create_one({parent_id: 1})
+    if @client[:categories].indexes.get(parent_id: 1).nil?
+      @client[:categories].indexes.create_one(parent_id: 1)
     end
   end
 end

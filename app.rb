@@ -1,4 +1,7 @@
+require 'dotenv/load'
+
 require 'sinatra'
+require 'sinatra/reloader'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/namespace'
@@ -20,6 +23,12 @@ configure :development do
 end
 
 class App < Sinatra::Application
+  configure :development do
+    register Sinatra::Reloader
+    after_reload do
+      puts 'reloaded'
+    end
+  end
   register Sinatra::Namespace
 
   def initialize
