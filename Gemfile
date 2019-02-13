@@ -14,9 +14,11 @@ gem 'sinatra-contrib'
 gem 'mongo'
 gem 'puma'
 gem 'dotenv'
+gem 'jwt'
 
 group :test do
   gem 'rspec'
   gem 'rspec-json_expectations'
   gem 'rspec-collection_matchers'
+  gem 'rack-test'
 end

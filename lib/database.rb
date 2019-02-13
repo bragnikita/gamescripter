@@ -53,8 +53,8 @@ class Database
                  sequence_or_coll
                end
     seq_key = @client[:sequences].find_one_and_update(
-      {name: seq_name},
-      '$inc' => {next_val: 1}
+      { name: seq_name },
+      '$inc' => { next_val: 1 }
     )
     seq_key[:next_val]
   end
@@ -96,8 +96,10 @@ class DBOperations
     db.users.insert_one(params).inserted_id
   end
 
-  def user_update(id, params)
-    db.users.update_one({_id: db.mongo_id(id)}, '$set' => params)
+  def user_update(id, params = {})
+    unless params.empty?
+      db.users.update_one({ _id: db.mongo_id(id) }, '$set' => params)
+    end
   end
 
   def user_one(id)
@@ -106,6 +108,14 @@ class DBOperations
 
   def user_all
     db.users.find
+  end
+
+  def user_by_name(username)
+    db.users.find({username: username}).first
+  end
+
+  def user_remove(id)
+    db.users.delete_one({ _id: db.mongo_id(id) })
   end
 
   def user_check_uniques(filter = {})

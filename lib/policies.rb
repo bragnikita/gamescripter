@@ -26,6 +26,7 @@ module Permissions
   USER_CREATE = "USER_CREATE"
   USER_CHANGE_META = "USER_CHANGE_META"
   USER_CHANGE_STATUS = "USER_CHANGE_STATUS"
+  USER_DELETE = "USER_DELETE"
 end
 
 class CategoryPermissionControl
@@ -47,7 +48,10 @@ class UsersPermissionControl
   def can_do?(action, target_user = nil)
     return true if is_admin?
 
-    if [Permissions::USER_CREATE, Permissions::USER_CHANGE_STATUS].include? action
+    if [Permissions::USER_CREATE,
+        Permissions::USER_CHANGE_STATUS,
+        Permissions::USER_DELETE
+    ].include? action
       return is_admin?
     end
     if Permissions::USER_CHANGE_META == action
@@ -57,7 +61,7 @@ class UsersPermissionControl
 
   def visible_parameters(target_user_id)
     public_params = [:username, :notes, :created_at, :avatar_uri, :displayName, :meta]
-    unless target_user_id == user['_id']
+    unless target_user_id == @user['_id']
       return public_params
     end
     public_params

@@ -15,13 +15,26 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 ENV['APP_ENV'] ||= 'test'
 
+require 'rack/test'
+ENV['RACK_ENV'] = 'test'
+
 require 'dotenv'
 Dotenv.load('env.test', '.env.development', '.env')
 
 require 'rspec/collection_matchers'
-require "rspec/json_expectations"
+require 'rspec/json_expectations'
 
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
+
+RSpec.shared_context 'database helpers' do
+  let(:database) { Database.instance }
+end
+
+require File.expand_path '../../app.rb', __FILE__
+module RSpecMixin
+  include Rack::Test::Methods
+  def app() App end
+end
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -54,8 +67,8 @@ RSpec.configure do |config|
   # triggering implicit auto-inclusion in groups with matching metadata.
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
-# The settings below are suggested to provide a good initial experience
-# with RSpec, but feel free to customize to your heart's content.
+  # The settings below are suggested to provide a good initial experience
+  # with RSpec, but feel free to customize to your heart's content.
 =begin
   # This allows you to limit a spec run to individual examples or groups
   # you care about by tagging them with `:focus` metadata. When nothing
@@ -104,8 +117,68 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 
-  config.define_derived_metadata(:file_path => %r{spec/.*}) do |meta|
+  config.define_derived_metadata(file_path: %r{spec/.*}) do |meta|
     meta[:aggregate_failures] = true
+  end
+
+  config.define_derived_metadata(file_path: %r{(/db_)|(/service_).*}) do |meta|
+    meta[:use_database] = true
+  end
+
+  config.define_derived_metadata(file_path: %r{spec/api/.*}) do |meta|
+    meta[:api] = true
+  end
+
+  config.include_context 'database helpers', use_database: true
+  config.include RSpecMixin, api: true
+
+  config.before(:suite) do
+    require 'database.rb'
+    Mongo::Logger.logger.level = Logger::WARN
+    Database.instance.connect
+  end
+
+  config.around(:each) do |example|
+    if example.metadata[:dblog]
+      Mongo::Logger.logger.level = Logger::DEBUG
+      example.run
+      Mongo::Logger.logger.level = Logger::WARN
+    else
+      example.run
+    end
+  end
+
+  config.around(:each) do |example|
+    auth_conf = example.metadata[:auth]
+    example.run && next if auth_conf.nil?
+
+    if auth_conf.is_a? String
+      ENV['TESTING_AUTH_USER_NAME'] = auth_conf
+      example.run
+      ENV.delete('TESTING_AUTH_USER_NAME')
+    else
+      example.run
+    end
+  end
+
+  config.around(:each) do |example|
+    collections_to_clear = example.metadata[:clear]
+    if collections_to_clear
+      database = Database.instance
+      if collections_to_clear.empty?
+        database.users.delete_many
+        database.categories.delete_many
+        database.scripts.delete_many
+        database.permissions.delete_many
+      else
+        collections_to_clear.each do |col|
+          database.client[col].delete_many
+        end
+      end
+      example.run
+    else
+      example.run
+    end
   end
 
   config.include RSpec::JsonExpectations::Matchers

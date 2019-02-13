@@ -3,14 +3,8 @@
 require 'spec_helper'
 require 'database.rb'
 
-Database.instance.connect
-DATABASE = Database.instance
-
-describe "user's db operations" do
-  let(:db) { DBOperations.new(DATABASE) }
-  before(:each) do
-    DATABASE.users.delete_many
-  end
+describe "user's db operations", :clear => ['users'] do
+  let(:db) { DBOperations.new(database) }
 
   describe 'insert user' do
     let(:user) do
@@ -52,7 +46,7 @@ describe "user's db operations" do
 
   describe 'select all' do
     before do
-      DATABASE.users.insert_many([
+      database.users.insert_many([
                                    { username: 'nikita' },
                                    { username: 'alex' },
                                    { username: 'ivan' }

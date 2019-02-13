@@ -5,6 +5,7 @@ GEM
     bson (4.3.0)
     diff-lcs (1.3)
     dotenv (2.6.0)
+    jwt (2.1.0)
     mongo (2.6.2)
       bson (>= 4.3.0, < 5.0.0)
     multi_json (1.13.1)
@@ -13,6 +14,8 @@ GEM
     rack (2.0.6)
     rack-protection (2.0.5)
       rack
+    rack-test (1.1.0)
+      rack (>= 1.0, < 3)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -48,8 +51,10 @@ PLATFORMS
 
 DEPENDENCIES
   dotenv
+  jwt
   mongo
   puma
+  rack-test
   rspec
   rspec-collection_matchers
   rspec-json_expectations
