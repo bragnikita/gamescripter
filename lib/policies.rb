@@ -64,7 +64,7 @@ class UsersPermissionControl
     unless target_user_id == @user['_id']
       return public_params
     end
-    public_params
+    :all
   end
 
   def is_admin?

@@ -12,6 +12,7 @@ require './lib/database'
 require './lib/categories_service'
 require './lib/services'
 require './lib/errors'
+require './lib/utils'
 
 configure do
   mime_type :json, 'application/json'
@@ -24,6 +25,8 @@ configure :development do
 end
 
 class App < Sinatra::Application
+  include ApiHelpers
+
   configure :development do
     register Sinatra::Reloader
     after_reload do
@@ -105,6 +108,13 @@ class App < Sinatra::Application
     users.delete(params[:id])
   end
 
+  # -------- Authorization -----
+
+  post '/auth' do
+    token = auth.signin parse_body
+    json token: token
+  end
+
   # -------- Permissions -----
 
 
@@ -114,7 +124,7 @@ class App < Sinatra::Application
   # -------- Errors ------
 
   error 404 do
-    settings[:logger].log('404!!!!')
+    settings.logging('404!!!!')
     [404, 'Route not found']
   end
 
@@ -141,11 +151,6 @@ class App < Sinatra::Application
 
   def dao
     DBOperations.new(Database.instance)
-  end
-
-  def parse_body
-    request.body.rewind
-    JSON.parse(request.body.read, symbolize_names: true)
   end
 
   def authenticate

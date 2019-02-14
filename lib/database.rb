@@ -103,15 +103,15 @@ class DBOperations
   end
 
   def user_one(id)
-    db.users.find(_id: db.mongo_id(id)).limit(1).first
+    query db.users.find(_id: db.mongo_id(id)).limit(1).first
   end
 
   def user_all
-    db.users.find
+    query db.users.find
   end
 
   def user_by_name(username)
-    db.users.find({username: username}).first
+    query db.users.find({ username: username }).first
   end
 
   def user_remove(id)
@@ -119,10 +119,17 @@ class DBOperations
   end
 
   def user_check_uniques(filter = {})
-    db.users.find(filter)
+    query db.users.find(filter)
   end
 
   private
 
-
+  def query(collection)
+    if collection.is_a? Mongo::Collection
+      collection.each { |c| c[:id] = c[:_id].to_s }
+    else
+      collection[:id] = collection[:_id].to_s
+    end
+    collection
+  end
 end

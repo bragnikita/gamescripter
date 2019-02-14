@@ -24,7 +24,9 @@ Dotenv.load('env.test', '.env.development', '.env')
 require 'rspec/collection_matchers'
 require 'rspec/json_expectations'
 
-$LOAD_PATH << File.expand_path('../lib', __FILE__)
+require 'support/request_helpers'
+
+$LOAD_PATH << File.expand_path('../lib', __dir__)
 
 RSpec.shared_context 'database helpers' do
   let(:database) { Database.instance }
@@ -33,7 +35,10 @@ end
 require File.expand_path '../../app.rb', __FILE__
 module RSpecMixin
   include Rack::Test::Methods
-  def app() App end
+
+  def app()
+    App
+  end
 end
 
 RSpec.configure do |config|
@@ -150,14 +155,16 @@ RSpec.configure do |config|
 
   config.around(:each) do |example|
     auth_conf = example.metadata[:auth]
-    example.run && next if auth_conf.nil?
-
-    if auth_conf.is_a? String
-      ENV['TESTING_AUTH_USER_NAME'] = auth_conf
+    if auth_conf.nil?
       example.run
-      ENV.delete('TESTING_AUTH_USER_NAME')
     else
-      example.run
+      if auth_conf.is_a? String
+        ENV['TESTING_AUTH_USER_NAME'] = auth_conf
+        example.run
+        ENV.delete('TESTING_AUTH_USER_NAME')
+      else
+        example.run
+      end
     end
   end
 
@@ -182,4 +189,11 @@ RSpec.configure do |config|
   end
 
   config.include RSpec::JsonExpectations::Matchers
+
+  config.include RequestHelpers
+
+  config.include RSpec::JsonExpectations::Matchers
+
+  config.include RSpec::Matchers
+  config.include RSpec::Mocks::ArgumentMatchers
 end
