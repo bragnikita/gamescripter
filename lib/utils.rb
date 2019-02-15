@@ -16,6 +16,10 @@ module ApiHelpers
       httponly: true
     )
   end
+
+  def request_headers
+    env.inject({}){|acc, (k,v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc}
+  end
 end
 
 module FormatUtils

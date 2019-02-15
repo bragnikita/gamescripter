@@ -24,7 +24,7 @@ Dotenv.load('env.test', '.env.development', '.env')
 require 'rspec/collection_matchers'
 require 'rspec/json_expectations'
 
-require 'support/request_helpers'
+require_relative 'support/request_helpers'
 
 $LOAD_PATH << File.expand_path('../lib', __dir__)
 

@@ -12,7 +12,7 @@ describe 'Auth API', use_database: true, clear: ['users'] do
   end
   describe 'signin' do
     it 'should authenticate user by login and password' do
-      post '/auth', as_json(username: 'admin', password: 'admin123')
+      post '/auth/create', as_json(username: 'admin', password: 'admin123')
 
       expect(last_response).to be_ok
       token = get_body[:token]
@@ -23,9 +23,34 @@ describe 'Auth API', use_database: true, clear: ['users'] do
     end
   end
 
-  describe 'token authentication' do
-    before do
+end
+describe 'If authorization succeeded', use_database: true, clear: ['users'] do
+  let!(:user) do
+    id = database.users.insert_one(
+      username: 'admin',
+      password_digest: FormatUtils::password_hash('admin123'),
+      active: true,
+      ).inserted_id
+    database.users.find(_id: id).first
+  end
+  before do
+    post '/auth/create', as_json(username: user[:username], password: 'admin123')
+    @token = get_body[:token]
+  end
+  it "will get request user's info" do
+    header('Authorization', 'Bearer ' + @token)
+    get "/users/#{user[:_id]}"
 
-    end
+    expect(last_response).to be_ok
+    expect(get_body[:username]).to eq(user[:username])
+  end
+end
+describe 'If authorization failed' do
+  it "will get request user's info" do
+    header('Authorization', 'Bearer ' + '<<<undecodable token>>>')
+    get "/users/0"
+
+    expect(last_response).not_to be_ok
+    expect(last_response.status).to eq(422)
   end
 end

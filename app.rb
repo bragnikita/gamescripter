@@ -110,7 +110,7 @@ class App < Sinatra::Application
 
   # -------- Authorization -----
 
-  post '/auth' do
+  post '/auth/create' do
     token = auth.signin parse_body
     json token: token
   end
@@ -124,7 +124,6 @@ class App < Sinatra::Application
   # -------- Errors ------
 
   error 404 do
-    settings.logging('404!!!!')
     [404, 'Route not found']
   end
 
@@ -134,6 +133,15 @@ class App < Sinatra::Application
 
   error BadRequest do
     [422, env['sinatra.error'].message]
+  end
+
+  error JWT::DecodeError do
+    error = env['sinatra.error']
+    if error.is_a? JWT::ExpiredSignature
+      [401, 'Token expired']
+    else
+      [422, error.message]
+    end
   end
 
   # ---------- Helpers ------
@@ -154,15 +162,20 @@ class App < Sinatra::Application
   end
 
   def authenticate
-    if settings.test?
-      username = ENV['TESTING_AUTH_USER_NAME']
-      @user = dao.user_by_name(username) if username
+    test_username = ENV['TESTING_AUTH_USER_NAME']
+    if settings.test? && !test_username.nil?
+      @user = dao.user_by_name(test_username)
     else
-      auth_headers = headers['Authorization']
-      raise AuthError, 'Not authorized' unless auth_headers
+      auth_headers = request_headers['authorization']
+      if auth_headers.nil?
+        raise AuthError, 'Not authorized'
+      end
 
       token = auth_headers.split.last
       @user = auth.authenticate token
+    end
+    if @user.nil?
+      raise AuthError, 'Not authenticated'
     end
   end
 
