@@ -22,29 +22,21 @@ describe 'Auth API', use_database: true, clear: ['users'] do
       expect(decoded_header['user_id']).to eq(user[:_id].to_s)
     end
   end
+  describe 'If authorization succeeded', use_database: true, clear: ['users'] do
+    before do
+      post '/auth/create', as_json(username: user[:username], password: 'admin123')
+      @token = get_body[:token]
+    end
+    it "will get request user's info" do
+      header('Authorization', 'Bearer ' + @token)
+      get "/users/#{user[:_id]}"
 
-end
-describe 'If authorization succeeded', use_database: true, clear: ['users'] do
-  let!(:user) do
-    id = database.users.insert_one(
-      username: 'admin',
-      password_digest: FormatUtils::password_hash('admin123'),
-      active: true,
-      ).inserted_id
-    database.users.find(_id: id).first
-  end
-  before do
-    post '/auth/create', as_json(username: user[:username], password: 'admin123')
-    @token = get_body[:token]
-  end
-  it "will get request user's info" do
-    header('Authorization', 'Bearer ' + @token)
-    get "/users/#{user[:_id]}"
-
-    expect(last_response).to be_ok
-    expect(get_body[:username]).to eq(user[:username])
+      expect(last_response).to be_ok
+      expect(get_body[:username]).to eq(user[:username])
+    end
   end
 end
+
 describe 'If authorization failed' do
   it "will get request user's info" do
     header('Authorization', 'Bearer ' + '<<<undecodable token>>>')

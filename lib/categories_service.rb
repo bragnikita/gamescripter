@@ -14,17 +14,16 @@ class CategoriesService
 
   def initialize
     @db = Database.instance
-    @coll = Database.instance.categories
+    @categories = DBOperations.new(@db).categories
   end
 
   def get(id)
-    category_doc = check(@coll.find({id: id.to_i}))
-    raise ObjectNotFound, "Category with id=#{id} is not found" if category_doc.count.zero?
+    category_doc = check(@categories.find_one(id))
+    raise ObjectNotFound, "Category with id=#{id} is not found" if category_doc.nil?
 
-    category_oid = category_doc.first[:_id]
-    category_doc = category_doc.map(&ITEM_MAPPER).first
+    category_oid = category_doc[:id]
 
-    nested_categories = @coll.find({parent_oid: category_oid}).sort(index: 1).map(&ITEM_MAPPER)
+    nested_categories = @categories.filter({parent_oid: category_oid}, {index: 1})
     category_doc[:categories] = nested_categories
 
     scripts = @db.scripts.find({category_oid: category_oid}).sort(index: 1).map do |doc|
@@ -41,7 +40,7 @@ class CategoriesService
   end
 
   def all
-    @coll.find.map(&ITEM_MAPPER)
+    @categories.filter
   end
 
   def create(category)

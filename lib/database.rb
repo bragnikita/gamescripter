@@ -79,10 +79,94 @@ class Database
   end
 end
 
+module DbHelpers
+  def query(collection)
+    if collection.is_a? Mongo::Collection::View
+      res = []
+      collection.each do |c|
+        c[:id] = c[:_id].to_s
+        res << c
+      end
+      res
+    else
+      collection[:id] = collection[:_id].to_s
+      collection
+    end
+  end
+end
+
+class DBResourceApiBase
+
+  include DbHelpers
+
+  attr_accessor :default_sorting
+
+  def initialize(db, collection_name)
+    @db = db
+    @collection_name = collection_name
+    @default_sorting = { created_at: 1 }
+  end
+
+  def create(params)
+    unless params['created_at']
+      params['created_at'] = @db.current_time
+    end
+    collection.insert_one(params).inserted_id.to_s
+  end
+
+  def update(id, params)
+    unless params.empty?
+      collection.update_one({ _id: @db.mongo_id(id) }, '$set' => params)
+    end
+  end
+
+  def find_one(id)
+    query collection.find(_id: @db.mongo_id(id)).limit(1).first
+  end
+
+  def find_one_by(params)
+    query collection.find(params).first
+  end
+
+  def filter(filter = {}, sort = {})
+    coll = collection.find(filter)
+    if sort.empty?
+      coll = coll.sort(@default_sorting)
+    else
+      coll = coll.sort(sort)
+    end
+    query coll
+  end
+
+  def delete(id)
+    collection.delete_one({ _id: @db.mongo_id(id) })
+  end
+
+  def exists?(filter)
+    collection.find(filter).count == 0
+  end
+
+  def collection
+    @db.client[@collection_name]
+  end
+
+end
+
+
+class CategoriesDbApi < DBResourceApiBase
+  def initialize(db, collection_name)
+    super
+  end
+end
+
 class DBOperations
+
+  include DbHelpers
+  attr_reader :categories
 
   def initialize(db)
     @database = db
+    @categories = CategoriesDbApi.new(db, :categories)
   end
 
   def db
@@ -122,14 +206,4 @@ class DBOperations
     query db.users.find(filter)
   end
 
-  private
-
-  def query(collection)
-    if collection.is_a? Mongo::Collection
-      collection.each { |c| c[:id] = c[:_id].to_s }
-    else
-      collection[:id] = collection[:_id].to_s
-    end
-    collection
-  end
 end
