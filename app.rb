@@ -17,8 +17,8 @@ require './lib/utils'
 configure do
   mime_type :json, 'application/json'
   mime_type :html, 'application/html'
-
 end
+
 configure :development do
   set :static => true
   set :public_folder => File.expand_path('public', __dir__)
@@ -52,6 +52,10 @@ class App < Sinatra::Application
 
   # -------- Categories ---------
   #
+  get '/category/:id/parents' do |id|
+    json categories.get_parents id
+  end
+
   get '/category/:id' do |id|
     json categories.get(id)
   end
@@ -75,7 +79,8 @@ class App < Sinatra::Application
   post '/category/:id' do
     data = parse_body
     data[:key] = params[:id]
-    json categories.update(data)
+    categories.update(data)
+    200
   end
 
   # -------- Users ---------
@@ -87,12 +92,14 @@ class App < Sinatra::Application
 
   put '/users/:id/meta' do
     data = parse_body
-    json users.change_meta(params[:id], data)
+    users.change_meta(params[:id], data)
+    200
   end
 
   put '/users/:id/status' do
     data = parse_body
-    json users.change_status(params[:id], data)
+    users.change_status(params[:id], data)
+    200
   end
 
   get '/users/:id' do
@@ -100,11 +107,12 @@ class App < Sinatra::Application
   end
 
   get '/users' do
-    json users.list
+    json users.list(params[:filter], params[:sort])
   end
 
   delete '/users/:id' do
     users.delete(params[:id])
+    200
   end
 
   # -------- Authorization -----
@@ -119,6 +127,37 @@ class App < Sinatra::Application
 
   # -------- Scripts ------
 
+  get '/script/:id' do |id|
+
+  end
+
+  post '/scripts' do
+
+  end
+
+  put '/script/:id' do |id|
+
+  end
+
+  put '/script/:id/content/save' do |id|
+
+  end
+
+  put '/script/:id/content/update' do |id|
+
+  end
+
+  get '/script/:id/preview' do |id|
+
+  end
+
+  post '/script/:id/images' do
+
+  end
+
+  get '/script/:id/images' do
+
+  end
 
   # -------- Errors ------
 
@@ -128,6 +167,16 @@ class App < Sinatra::Application
 
   error ObjectNotFound do
     [404, env['sinatra.error'].message]
+  end
+
+  error Mongoid::Errors::MongoidError do
+    err = env['sinatra.error']
+    if err.kind_of?(Mongoid::Errors::DocumentNotFound)
+      ret = [404, env['sinatra.error'].message]
+    else
+      ret = [422, env['sinatra.error'].message]
+    end
+    ret
   end
 
   error BadRequest do
@@ -154,10 +203,6 @@ class App < Sinatra::Application
 
   def auth
     AuthService.new
-  end
-
-  def dao
-    DBOperations.new(Database.instance)
   end
 
   def authenticate

@@ -45,7 +45,7 @@ class CategoriesService
   end
 
   def delete(id)
-    Category.find(id).destroy
+    Category.find(id).destroy!
   end
 
   private
