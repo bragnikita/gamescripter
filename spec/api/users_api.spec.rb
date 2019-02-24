@@ -8,7 +8,7 @@ describe 'Users API', use_database: true, clear: [:users], auth: 'admin', dblog:
     ).inserted_id
     database.users.find(_id: id).first
   end
-  describe 'get' do
+  xdescribe 'get' do
     it 'should return one user' do
       get "/users/#{user[:_id]}"
 
@@ -21,7 +21,7 @@ describe 'Users API', use_database: true, clear: [:users], auth: 'admin', dblog:
                       )
     end
   end
-  describe 'update' do
+  xdescribe 'update' do
     it 'should update user' do
       put "/users/#{user[:_id]}/meta", as_json(display_name: 'nikita', active: false)
 
@@ -48,7 +48,7 @@ describe 'Users API', use_database: true, clear: [:users], auth: 'admin', dblog:
                       )
     end
   end
-  describe 'if delete user' do
+  xdescribe 'if delete user' do
     let!(:user_to_delete) do
       id = database.users.insert_one(
         username: 'nikita'

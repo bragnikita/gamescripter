@@ -1,21 +1,22 @@
 require 'policies.rb'
 require 'utils.rb'
+require_relative 'models/user'
 
 class UsersService
 
-  def initialize(executor, db_operations)
+  def initialize(executor)
     @user = executor
-    @db = db_operations
     @permissions = UsersPermissionControl.new(@user);
   end
 
   def create(params)
     @permissions.ensure(Permissions::USER_CREATE)
-    ensure_unique({ username: params[:username] })
-    params[:password_digest] = FormatUtils::password_hash(params[:password])
+    raise 'username is already in use' if User.where(username: params[:username]).exists?
+    password = params[:password]
+    raise 'password is required' unless password
+    params[:password_digest] = FormatUtils::password_hash(password)
     params.delete(:password)
-    id = @db.user_create(params)
-    serialize(@db.user_one(id))
+    User.create!(params)
   end
 
   def change_meta(id, params)
@@ -26,81 +27,61 @@ class UsersService
     if params.has_key?(:password)
       allowed_parameters[:password_digest] = FormatUtils::password_hash(params[:password])
     end
-    @db.user_update(id, allowed_parameters)
-    serialize @db.user_one(id)
+    allowed_parameters.delete(:password)
+    User.find(id).update_attributes!(allowed_parameters)
   end
 
   def change_status(id, params)
     @permissions.ensure(Permissions::USER_CHANGE_STATUS, id)
 
-    ensure_unique(username: params[:username])
+    raise 'username is already in use' if User.where(username: params[:username]).exists?
     change_meta(id, params)
-    @db.user_update(id, filter(params, :username, :active))
-    serialize @db.user_one(id)
+    User.find(id).update_attributes!(filter(params, :username, :active))
   end
 
   def show(id)
     public_params = @permissions.visible_parameters(id)
-    o = serialize(@db.user_one(id))
-    if o == :all
-      filtered = o;
+    if public_params == :all
+      filter = {}
     else
-      filtered = filter(o, *public_params)
+      filter = { only: public_params }
     end
-    filtered[:id] = o[:id]
-    filtered
+    User.find(id).serializable_hash(filter)
   end
 
   def delete(id)
     @permissions.ensure(Permissions::USER_DELETE)
-    @db.user_remove(id)
+    User.find(id).destroy
   end
 
-  def list(filter = {})
-    # TODO
-    @db.user_all.map(&method(:serialize))
+  def list(filter = {}, sort = { username: 'asc' })
+    @permissions.ensure(Permissions::USERS_LIST)
+    User.where(filter).order_by(sort).map(&:serializable_hash)
   end
 
-  def serialize(user)
-    user[:id] = user.delete('_id').to_s
-    user.delete('password_digest')
-    user
-  end
-
-  def ensure_unique(filter, msg = 'Non unique param')
-    if @db.user_check_uniques(filter).count > 0
-      raise msg;
-    end
-  end
 end
 
 class AuthService
-
-  def initialize(dbops)
-    @dao = dbops
-  end
 
   def authenticate(token)
     decoded = JsonWebToken.decode(token)
     raise 'Wrong token' unless decoded
 
     user_id = decoded['user_id']
-    @dao.user_one(user_id)
+    User.find(user_id)
   end
 
   def signin(username:, password:)
-    user = @dao.user_by_name(username)
+    user = User.where(username: username).first
     raise AuthError, 'User not found', 402 unless user
 
-    hash = FormatUtils::password_hash(password)
-    unless user[:password_digest] == hash
+    unless user.is_password_valid? password
       raise AuthError, 'Wrong password', 402
     end
 
     JsonWebToken.encode({
-                          user_id: user[:id]
+                          user_id: user.id.to_s
                         })
-
   end
 end
 

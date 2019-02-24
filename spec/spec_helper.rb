@@ -25,11 +25,13 @@ require 'rspec/collection_matchers'
 require 'rspec/json_expectations'
 
 require_relative 'support/request_helpers'
+require_relative 'support/common_helpers'
 
 $LOAD_PATH << File.expand_path('../lib', __dir__)
+$LOAD_PATH << File.expand_path('../lib/models', __dir__)
 
 RSpec.shared_context 'database helpers' do
-  let(:database) { Database.instance }
+
 end
 
 require File.expand_path '../../app.rb', __FILE__
@@ -138,9 +140,8 @@ RSpec.configure do |config|
   config.include RSpecMixin, api: true
 
   config.before(:suite) do
-    require 'database.rb'
+    Mongoid.load!(File.expand_path('../mongoid.yml', __dir__), :test)
     Mongo::Logger.logger.level = Logger::WARN
-    Database.instance.connect
   end
 
   config.around(:each) do |example|
@@ -171,15 +172,15 @@ RSpec.configure do |config|
   config.around(:each) do |example|
     collections_to_clear = example.metadata[:clear]
     if collections_to_clear
-      database = Database.instance
+      database = Mongoid.client('default')
       if collections_to_clear.empty?
-        database.users.delete_many
-        database.categories.delete_many
-        database.scripts.delete_many
-        database.permissions.delete_many
+        database[:users].delete_many
+        database[:categories].delete_many
+        database[:scripts].delete_many
+        database[:permissions].delete_many
       else
         collections_to_clear.each do |col|
-          database.client[col].delete_many
+          database[col].delete_many
         end
       end
       example.run
@@ -191,6 +192,7 @@ RSpec.configure do |config|
   config.include RSpec::JsonExpectations::Matchers
 
   config.include RequestHelpers
+  config.include CommonHelpers
 
   config.include RSpec::JsonExpectations::Matchers
 

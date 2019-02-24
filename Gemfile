@@ -11,7 +11,7 @@ ruby '2.5.0'
 
 gem 'sinatra'
 gem 'sinatra-contrib'
-gem 'mongo'
+gem 'mongoid'
 gem 'puma'
 gem 'dotenv'
 gem 'jwt'

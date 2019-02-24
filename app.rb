@@ -37,7 +37,6 @@ class App < Sinatra::Application
 
   def initialize
     super
-    Database.instance.connect
   end
 
   # ------ Filters ------
@@ -150,11 +149,11 @@ class App < Sinatra::Application
   end
 
   def users
-    UsersService.new({ username: 'admin' }, dao)
+    UsersService.new({ username: 'admin' })
   end
 
   def auth
-    AuthService.new(dao)
+    AuthService.new
   end
 
   def dao
@@ -164,7 +163,7 @@ class App < Sinatra::Application
   def authenticate
     test_username = ENV['TESTING_AUTH_USER_NAME']
     if settings.test? && !test_username.nil?
-      @user = dao.user_by_name(test_username)
+      @user = User.find(username: test_username)
     else
       auth_headers = request_headers['authorization']
       if auth_headers.nil?
