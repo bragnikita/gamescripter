@@ -7,6 +7,8 @@ require 'sinatra/json'
 require 'sinatra/namespace'
 require 'json'
 
+require './lib/initializers'
+
 # $LOAD_PATH << File.expand_path('lib', __dir__)
 require './lib/database'
 require './lib/categories_service'
@@ -60,6 +62,10 @@ class App < Sinatra::Application
     json categories.get(id)
   end
 
+  get '/categories/root' do
+    json categories.root
+  end
+
   get '/categories' do
     json categories.all
   end
@@ -78,8 +84,8 @@ class App < Sinatra::Application
 
   post '/category/:id' do
     data = parse_body
-    data[:key] = params[:id]
-    categories.update(data)
+    # data[:key] = params[:id]
+    categories.update(params[:id], data)
     200
   end
 
@@ -208,7 +214,7 @@ class App < Sinatra::Application
   def authenticate
     test_username = ENV['TESTING_AUTH_USER_NAME']
     if settings.test? && !test_username.nil?
-      @user = User.find(username: test_username)
+      @user = User.find_by(username: test_username)
     else
       auth_headers = request_headers['authorization']
       if auth_headers.nil?

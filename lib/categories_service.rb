@@ -4,6 +4,10 @@ require_relative 'models/category'
 # Operations on categories
 class CategoriesService
 
+  def root
+    Category.where(parent: nil).order_by(title: :asc)
+  end
+
   def get_parents(id)
     category_doc = Category.find(id)
     upper_parents = []
@@ -16,14 +20,14 @@ class CategoriesService
     end
 
     add_parent(category_doc, upper_parents)
-    upper_parents.map(&:serializable_hash)
+    upper_parents
   end
 
   def get(id)
     category_doc = Category.find(id)
     nested_categories = category_doc.children
-    hash = category_doc.serializable_hash
-    hash[:children] = nested_categories.map(&:serializable_hash)
+    hash = category_doc.as_json
+    hash[:children] = nested_categories.map(&:as_json)
     hash
   end
 

@@ -1,4 +1,5 @@
 require 'mongoid'
+require_relative 'script'
 
 class Category
   include Mongoid::Document

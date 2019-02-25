@@ -21,11 +21,12 @@ ENV['RACK_ENV'] = 'test'
 require 'dotenv'
 Dotenv.load('env.test', '.env.development', '.env')
 
+require 'rspec'
+require "rspec/expectations"
 require 'rspec/collection_matchers'
 require 'rspec/json_expectations'
 
-require_relative 'support/request_helpers'
-require_relative 'support/common_helpers'
+Dir[File.expand_path 'support/**/*.rb', __dir__ ].each {|f| require f}
 
 $LOAD_PATH << File.expand_path('../lib', __dir__)
 $LOAD_PATH << File.expand_path('../lib/models', __dir__)
@@ -151,6 +152,12 @@ RSpec.configure do |config|
       Mongo::Logger.logger.level = Logger::WARN
     else
       example.run
+    end
+  end
+
+  config.after(:each, print_json: true) do
+    if last_response
+      p get_body
     end
   end
 
