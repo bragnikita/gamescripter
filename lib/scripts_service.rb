@@ -4,6 +4,10 @@ require 'gamescript_creator'
 
 class ScriptOperations
 
+  def initialize()
+    @default_script_version = 'v0.1'
+  end
+
   def create(params)
     s = Script.new(params)
     # create attachmens folder
@@ -27,7 +31,7 @@ class ScriptOperations
   def update_content(id, content)
     script = Script.find(id)
     script.update_attributes!(source: content)
-    stack = GamescriptCreator::build_stack script.version
+    stack = GamescriptCreator::build_stack (script.version || @default_script_version)
     io = Tempfile.new('id')
     begin
       io.write content

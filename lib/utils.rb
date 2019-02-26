@@ -6,11 +6,20 @@ module ApiHelpers
     JSON.parse(request.body.read, symbolize_names: true)
   end
 
+  def body_as_string
+    request.body.rewind
+    if request.body.instance_of?(StringIO)
+      request.body.string
+    else
+      request.body.read
+    end
+  end
+
   def set_jwt_cookie(jwt_payload)
     response.set_cookie(
       :access_token,
       value: jwt_payload,
-      expires: Time.now + 3600*24,
+      expires: Time.now + 3600 * 24,
       secure: ENV['APP_ENV'] == :production,
       path: '/',
       httponly: true
@@ -18,7 +27,7 @@ module ApiHelpers
   end
 
   def request_headers
-    env.inject({}){|acc, (k,v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc}
+    env.inject({}) { |acc, (k, v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc }
   end
 end
 
@@ -36,7 +45,7 @@ end
 
 class JsonWebToken
   class << self
-    def encode(payload, exp = Time.now + 24*3600)
+    def encode(payload, exp = Time.now + 24 * 3600)
       payload[:exp] = exp.to_i
       JWT.encode(payload, ENV['APP_SECRET'])
     end
@@ -44,7 +53,7 @@ class JsonWebToken
     # throws JWT::ExpiredSignature < JST::DecodeError if the token is expired
     # throws common JST::DecodeError in all other decoding error cases
     def decode(token)
-      body = JWT.decode(token, ENV['APP_SECRET'], true, { leeway: 24*3600} )[0]
+      body = JWT.decode(token, ENV['APP_SECRET'], true, { leeway: 24 * 3600 })[0]
       Hash.new.merge! body
     end
   end

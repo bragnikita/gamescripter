@@ -13,4 +13,11 @@ module RequestHelpers
     JSON.dump(hash)
   end
 
+  def auth(username = 'admin')
+    ENV['TESTING_AUTH_USER_NAME'] = username
+  end
+  def clear_auth
+    ENV.delete('TESTING_AUTH_USER_NAME')
+  end
+
 end

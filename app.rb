@@ -12,6 +12,7 @@ require './lib/initializers'
 # $LOAD_PATH << File.expand_path('lib', __dir__)
 require './lib/database'
 require './lib/categories_service'
+require './lib/scripts_service'
 require './lib/services'
 require './lib/errors'
 require './lib/utils'
@@ -134,35 +135,39 @@ class App < Sinatra::Application
   # -------- Scripts ------
 
   get '/script/:id' do |id|
-
+    res = scripts.get_with_source(id)
+    json res
   end
 
   post '/scripts' do
-
+    json scripts.create(parse_body)
   end
 
   put '/script/:id' do |id|
-
+    scripts.update(id, parse_body)
+    200
   end
 
   put '/script/:id/content/save' do |id|
-
+    scripts.save_content(id, body_as_string)
+    200
   end
 
   put '/script/:id/content/update' do |id|
-
+    scripts.update_content(id, body_as_string)
+    200
   end
 
   get '/script/:id/preview' do |id|
-
+    scripts.get_html(id)
   end
 
   post '/script/:id/images' do
-
+    501
   end
 
   get '/script/:id/images' do
-
+    501
   end
 
   # -------- Errors ------
@@ -205,6 +210,10 @@ class App < Sinatra::Application
 
   def users
     UsersService.new({ username: 'admin' })
+  end
+
+  def scripts
+    ScriptOperations.new
   end
 
   def auth

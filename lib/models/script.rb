@@ -19,6 +19,8 @@ class Script
 
   scope :params, -> { without(:source, :html) }
   scope :with_source, -> { without(:html) }
+
+  validates :title, uniqueness: { scope: :category }
 end
 
 class Image
