@@ -5,6 +5,7 @@ require 'sinatra/reloader'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/namespace'
+require 'sinatra/cross_origin'
 require 'json'
 
 require './lib/initializers'
@@ -16,16 +17,10 @@ require './lib/scripts_service'
 require './lib/services'
 require './lib/errors'
 require './lib/utils'
+require './lib/configuration'
 
-configure do
-  mime_type :json, 'application/json'
-  mime_type :html, 'application/html'
-end
 
-configure :development do
-  set :static => true
-  set :public_folder => File.expand_path('public', __dir__)
-end
+Configuration.instance.configure_for_env(ENV['APP_ENV'] || 'development')
 
 class App < Sinatra::Application
   include ApiHelpers
@@ -35,8 +30,21 @@ class App < Sinatra::Application
     after_reload do
       puts 'reloaded'
     end
+    set :static => true
+    set :public_folder => File.expand_path('public', __dir__)
+    set :raise_errors => false
+    set :show_exceptions => false
   end
-  # register Sinatra::Namespace
+
+  register Sinatra::CrossOrigin
+  configure do
+    mime_type :json, 'application/json'
+    mime_type :html, 'application/html'
+    enable :cross_origin
+    set :allow_origin, :any
+    set :allow_methods, [:get, :post, :options, :put, :delete]
+    set :allow_credentials, true
+  end
 
   def initialize
     super
@@ -46,6 +54,14 @@ class App < Sinatra::Application
 
   before %r{\/((?!auth\/create).)*} do
     authenticate
+  end
+
+  options "*" do
+    response.headers["Allow"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] =
+      "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, authorization, pragma"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    200
   end
 
   get '/' do
@@ -176,9 +192,11 @@ class App < Sinatra::Application
     [404, 'Route not found']
   end
 
-  error ObjectNotFound do
-    [404, env['sinatra.error'].message]
+  error ClientError do
+    e = env['sinatra.error']
+    [e.code, e.message]
   end
+
 
   error Mongoid::Errors::MongoidError do
     err = env['sinatra.error']
@@ -190,9 +208,6 @@ class App < Sinatra::Application
     ret
   end
 
-  error BadRequest do
-    [422, env['sinatra.error'].message]
-  end
 
   error JWT::DecodeError do
     error = env['sinatra.error']

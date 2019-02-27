@@ -1,7 +1,7 @@
 db.users.insert([
     {
         username: 'admin',
-        displayName: 'Admin',
+        display_name: 'Admin',
         password_digest: '4cb9c8a8048fd02294477fcb1a41191a', //changeme
         notes: '',
         avatar_url: null,
@@ -11,7 +11,7 @@ db.users.insert([
     },
     {
         username: 'demo',
-        displayName: 'Demo',
+        display_name: 'Demo',
         password_digest: '70b078e6735224a212ef4bd9c45e3f83', //tryit
         notes: '',
         avatar_url: null,

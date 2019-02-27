@@ -11,6 +11,7 @@ ruby '2.5.0'
 
 gem 'sinatra'
 gem 'sinatra-contrib'
+gem "sinatra-cross_origin"
 gem 'mongoid'
 gem 'puma'
 gem 'dotenv'

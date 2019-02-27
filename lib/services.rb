@@ -1,5 +1,5 @@
-require 'policies.rb'
-require 'utils.rb'
+require_relative 'policies.rb'
+require_relative 'utils.rb'
 require_relative 'models/user'
 
 class UsersService
@@ -73,10 +73,10 @@ class AuthService
 
   def signin(username:, password:)
     user = User.where(username: username).first
-    raise AuthError, 'User not found', 402 unless user
+    raise AuthError.new('User not found', 400) unless user
 
     unless user.is_password_valid? password
-      raise AuthError, 'Wrong password', 402
+      raise AuthError.new('Wrong password', 400)
     end
 
     JsonWebToken.encode({

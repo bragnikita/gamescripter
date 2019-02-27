@@ -32,6 +32,15 @@ describe 'Auth API', clear: ['users'] do
       expect(get_body[:username]).to eq(user.username)
     end
   end
+  describe 'If authorization failed', clear: ['users'] do
+    before do
+      post '/auth/create', as_json(username: user.username, password: '<<?>>')
+    end
+    it 'returns message and 402 code' do
+      expect(last_response.status).to eq(402)
+      expect(last_response.body).to eq('Wrong password')
+    end
+  end
 end
 
 describe 'If authorization failed' do

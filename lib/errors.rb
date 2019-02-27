@@ -1,11 +1,22 @@
 class ClientError < StandardError
-
-end
-class ObjectNotFound < ClientError; end
-class BadRequest < ClientError; end
-class AuthError < ClientError
-  def initialize(msg, code = 401)
+  def initialize(msg = '', code = 400)
     super(msg)
     @code = code
+  end
+  attr_reader :code
+end
+class ObjectNotFound < ClientError
+  def initialize(msg = '')
+    super(msg, 404)
+  end
+end
+class BadRequest < ClientError
+  def initialize(msg = '')
+    super(msg, 400)
+  end
+end
+class AuthError < ClientError
+  def initialize(msg = '', code=401)
+    super(msg, code)
   end
 end
