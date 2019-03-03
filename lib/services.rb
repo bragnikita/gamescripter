@@ -1,6 +1,7 @@
 require_relative 'policies.rb'
 require_relative 'utils.rb'
 require_relative 'models/user'
+require_relative 'models/dictionary'
 
 class UsersService
 
@@ -46,7 +47,7 @@ class UsersService
     else
       filter = { only: public_params }
     end
-    User.find(id).serializable_hash(filter)
+    User.find(id).as_json(filter)
   end
 
   def delete(id)
@@ -56,7 +57,7 @@ class UsersService
 
   def list(filter = {}, sort = { username: 'asc' })
     @permissions.ensure(Permissions::USERS_LIST)
-    User.where(filter).order_by(sort).map(&:serializable_hash)
+    User.where(filter).order_by(sort).map(&:as_json)
   end
 
 end
@@ -65,10 +66,12 @@ class AuthService
 
   def authenticate(token)
     decoded = JsonWebToken.decode(token)
-    raise 'Wrong token' unless decoded
+    raise AuthError.new('Wrong token', 401) unless decoded
 
     user_id = decoded['user_id']
-    User.find(user_id)
+    user = User.where(id: user_id).first
+    raise AuthError.new('User was deleted', 404) if user.nil?
+    user
   end
 
   def signin(username:, password:)
@@ -83,6 +86,23 @@ class AuthService
                           user_id: user.id.to_s
                         })
   end
+end
+
+class DictionariesService
+
+  def load_all
+    json = []
+    Dictionary.all.each do |dict|
+      json << {
+        id: dict.id.to_s,
+        name: dict.name,
+        title: dict.title,
+        records: dict.records.map { |r| r.as_json }
+      }
+    end
+    json
+  end
+
 end
 
 def filter(params_hash = {}, *allowed_keys)

@@ -1,3 +1,5 @@
+db = db.getSiblingDB('gamescripter');
+
 db.users.insert([
     {
         username: 'admin',

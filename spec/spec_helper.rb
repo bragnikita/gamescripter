@@ -18,8 +18,6 @@ ENV['APP_ENV'] ||= 'test'
 require 'rack/test'
 ENV['RACK_ENV'] = 'test'
 
-require 'dotenv'
-Dotenv.load('env.test', '.env.development', '.env')
 
 require 'rspec'
 require "rspec/expectations"
@@ -30,6 +28,9 @@ Dir[File.expand_path 'support/**/*.rb', __dir__ ].each {|f| require f}
 
 $LOAD_PATH << File.expand_path('../lib', __dir__)
 $LOAD_PATH << File.expand_path('../lib/models', __dir__)
+
+require 'configuration'
+Configuration.instance.configure_for_env('test')
 
 RSpec.shared_context 'database helpers' do
 
@@ -141,7 +142,7 @@ RSpec.configure do |config|
   config.include RSpecMixin, api: true
 
   config.before(:suite) do
-    Mongoid.load!(File.expand_path('../mongoid.yml', __dir__), :test)
+    # Mongoid.load!(File.expand_path('../mongoid.yml', __dir__), :test)
     Mongo::Logger.logger.level = Logger::WARN
   end
 
@@ -157,7 +158,7 @@ RSpec.configure do |config|
 
   config.after(:each, print_json: true) do
     if last_response
-      p get_body
+      puts JSON.pretty_generate(get_body)
     end
   end
 
@@ -174,6 +175,10 @@ RSpec.configure do |config|
         example.run
       end
     end
+  end
+
+  config.before(:context, :auth) do
+    ENV['TESTING_AUTH_USER_NAME'] = 'admin'
   end
 
   config.around(:each) do |example|

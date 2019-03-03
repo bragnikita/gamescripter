@@ -22,7 +22,7 @@ describe CategoriesService, :clear => [:categories] do
   describe '#get' do
     it 'returns category by id' do
       json = HashWithIndifferentAccess.new service.get(cat.id)
-      expect(json).to include(:title, :children => have(2).items)
+      expect(json).to include(:id, :title, :children => have(2).items)
     end
   end
 
@@ -31,6 +31,7 @@ describe CategoriesService, :clear => [:categories] do
     it 'returns parents' do
       json = service.get_parents(child.id)
       expect(json).to be_kind_of(Array)
+      # expect(json).to all(include(:id, :title))
       expect(json.map { |j| j['title'] }).to eq(['parent', 'root'])
     end
   end

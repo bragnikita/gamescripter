@@ -1,2 +1,2 @@
-db = db.getSiblingDB('gamescripter');
+print('Hello, world!!!');
 // do some database manipulations here

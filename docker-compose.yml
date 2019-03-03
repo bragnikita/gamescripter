@@ -11,4 +11,4 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: "mongo-admin"
       MONGO_INITDB_ROOT_PASSWORD: "admin_password"
-      MONGO_INITDB_DATABASE: "gamescripter"
+#      MONGO_INITDB_DATABASE: "gamescripter"

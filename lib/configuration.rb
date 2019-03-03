@@ -5,7 +5,13 @@ require_relative 'ext'
 class Configuration
   include Singleton
 
+  @configured = false
+
   def configure_for_env(env = 'development')
+    if @configured
+      puts "Already configured for env #{@env}. Do nothing;"
+      return
+    end
     @env = env
     @errors = []
 
@@ -15,6 +21,7 @@ class Configuration
 
     check_vars 'APP_SECRET'
     configure_database
+    @configured = true
   end
 
   attr_reader :scripts_attachments_root,
@@ -30,13 +37,16 @@ class Configuration
   end
 
   def configure_database
+    done = false
     if @env === 'development'
       cfg_path = File.expand_path 'mongoid.yml', app_root
       if File.exists? cfg_path
         Mongoid.load!(cfg_path, :development)
-      else
-        configure_from_env
+        done = true
       end
+    end
+    unless done
+      configure_from_env
     end
   end
 

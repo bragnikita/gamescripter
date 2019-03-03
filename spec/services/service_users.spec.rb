@@ -106,6 +106,7 @@ describe 'UsersService', clear: ['users'] do
   describe '#list' do
     it 'selects all' do
       expect(service.list).to have(2).items
+      expect(service.list).to all(include('id', 'username'))
     end
     it 'selects active only' do
       expect(service.list({active: true})).to have(2).items

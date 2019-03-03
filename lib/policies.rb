@@ -65,7 +65,7 @@ class UsersPermissionControl
     if target_user_id == @user['id'] || is_admin?
       return :all
     end
-    [:username, :notes, :created_at, :avatar_uri, :display_name, :meta]
+    [:id, :username, :notes, :created_at, :avatar_uri, :display_name, :meta]
   end
 
   def is_admin?

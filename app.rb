@@ -53,7 +53,9 @@ class App < Sinatra::Application
   # ------ Filters ------
 
   before %r{\/((?!auth\/create).)*} do
-    authenticate
+    unless request.request_method == 'OPTIONS'
+      authenticate
+    end
   end
 
   options "*" do
@@ -186,6 +188,16 @@ class App < Sinatra::Application
     501
   end
 
+  # -------- Dictionaries -------
+
+  get '/dictionaries' do
+    json dicts.load_all
+  end
+
+  put '/dictionaries/:name' do |name|
+    501
+  end
+
   # -------- Errors ------
 
   error 404 do
@@ -233,6 +245,10 @@ class App < Sinatra::Application
 
   def auth
     AuthService.new
+  end
+
+  def dicts
+    DictionariesService.new
   end
 
   def authenticate
