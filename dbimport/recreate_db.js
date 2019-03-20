@@ -52,6 +52,7 @@ var story_types = [
     ['special', 'Спешл стори']
 ];
 var category_types = [
+    ['general', 'Обычная'],
     ['episode', 'Эпизод(話)'],
     ['chapter', 'Глава(章)'],
     ['arc', 'Арка'],

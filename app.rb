@@ -89,7 +89,7 @@ class App < Sinatra::Application
     json categories.all
   end
 
-  put '/categories' do
+  post '/categories' do
     data = parse_body
     json categories.create(data)
   end
@@ -101,7 +101,7 @@ class App < Sinatra::Application
     200
   end
 
-  post '/category/:id' do
+  put '/category/:id' do
     data = parse_body
     # data[:key] = params[:id]
     categories.update(params[:id], data)
