@@ -3,9 +3,8 @@ language: ruby
 services:
   - docker
 before_script:
-  - docker-compose build
   - docker-compose up -d
-  - sleep 20
+  - sleep 5
 script:
   - bundle exec rspec --pattern '**/*.spec.rb' --format d
 after_script:
