@@ -36,8 +36,8 @@ describe 'Auth API', clear: ['users'] do
     before do
       post '/auth/create', as_json(username: user.username, password: '<<?>>')
     end
-    it 'returns message and 402 code' do
-      expect(last_response.status).to eq(402)
+    it 'returns message and 400 code' do
+      expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('Wrong password')
     end
   end

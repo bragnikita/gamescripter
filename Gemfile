@@ -7,7 +7,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 # gem "rails"
 #
 
-ruby '2.5.0'
+ruby '2.6.2'
 
 gem 'sinatra'
 gem 'sinatra-contrib'

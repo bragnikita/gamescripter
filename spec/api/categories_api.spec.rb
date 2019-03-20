@@ -65,8 +65,8 @@ describe 'Categories API', clear: ['categories'], auth: 'admin' do
     end
   end
 
-  describe 'put /categories' do
-    before { put '/categories', as_json(title: 'new category', index: 3, parent_id: parent.id.to_s) }
+  describe 'post /categories' do
+    before { post '/categories', as_json(title: 'new category', index: 3, parent_id: parent.id.to_s) }
     let(:created_id) { get_body[:id] }
 
     it_behaves_like 'successfull json request'
@@ -76,9 +76,9 @@ describe 'Categories API', clear: ['categories'], auth: 'admin' do
     end
   end
 
-  describe 'post /category/:id' do
+  describe 'put /category/:id' do
     let(:target_id) { cats[0].id.to_s }
-    before(:each) { post "/category/#{target_id}", as_json(:title => 'new_value', :parent_id => root.id.to_s) }
+    before(:each) { put "/category/#{target_id}", as_json(:title => 'new_value', :parent_id => root.id.to_s) }
 
     it_behaves_like 'successfull request'
     it 'updates the category' do
