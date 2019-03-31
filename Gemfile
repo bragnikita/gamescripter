@@ -25,4 +25,6 @@ group :test do
 end
 group :development do
   gem "capistrano", "~> 3.10", require: false
+  gem 'capistrano3-puma', require: false
+  gem 'capistrano-bundler', '~> 1.5', require: false
 end
