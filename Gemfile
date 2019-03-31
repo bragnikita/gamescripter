@@ -23,3 +23,6 @@ group :test do
   gem 'rspec-collection_matchers'
   gem 'rack-test'
 end
+group :development do
+  gem "capistrano", "~> 3.10", require: false
+end
