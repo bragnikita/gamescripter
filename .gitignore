@@ -4,3 +4,5 @@
 .env
 .env.production
 log/
+config/server_key
+config/server_key.pub
