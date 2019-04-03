@@ -1,4 +1,10 @@
-db = db.getSiblingDB('gamescripter');
+db = db.getSiblingDB('gamescripter-test');
+db.users.drop();
+db.categories.drop();
+db.sequences.drop();
+db.permissions.drop();
+db.posts.drop();
+db.dictionaries.drop();
 
 db.users.insert([
     {
@@ -37,4 +43,51 @@ db.categories.insert([
 db.sequences.insert([
     {name: 'categories', next_val: 1},
     {name: 'scripts', next_val: 0}
+]);
+var story_types = [
+    ['main', 'Main стори'],
+    ['another', 'Другая история'],
+    ['chara', 'История персонажа'],
+    ['costume', 'История костюма'],
+    ['event', 'Ивент'],
+    ['special', 'Спешл стори']
+];
+var category_types = [
+    ['general', 'Обычная'],
+    ['episode', 'Эпизод(話)'],
+    ['chapter', 'Глава(章)'],
+    ['arc', 'Арка'],
+    ['story', 'История']
+];
+var script_types = [
+    ['battle', 'Бэттл'],
+    ['part', 'Часть'],
+    ['single', 'Сингл'],
+    ['intro', 'Интро']
+];
+
+function mapDict(c, index) {
+    return {
+        parameter: c[0],
+        title: c[1],
+        index: index
+    }
+}
+
+db.dictionaries.insert([
+    {
+        name: 'category_types',
+        title: 'Category type',
+        records: category_types.map(mapDict)
+    },
+    {
+        name: 'script_types',
+        title: 'Script type',
+        records: script_types.map(mapDict)
+    },
+    {
+        name: 'story_types',
+        title: 'Story type',
+        records: story_types.map(mapDict)
+    }
 ]);
