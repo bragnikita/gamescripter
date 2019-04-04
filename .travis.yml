@@ -11,7 +11,7 @@ after_success:
   - eval "$(ssh-agent -s)"
   - chmod 600 config/server_key
   - ssh-add config/server_key
-  - cap production deploy
+  - bundle exec cap production deploy
 after_script:
   - docker-compose down
 env:
