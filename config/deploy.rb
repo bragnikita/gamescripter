@@ -7,7 +7,7 @@ set :repo_url, "git@github.com:bragnikita/gamescripter.git"
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
 set :branch, "master"
 
-set :deploy_to, "/tmp/www/#{fetch(:application)}"
+set :deploy_to, "/var/www/#{fetch(:application)}"
 
 set :puma_threads,    [4, 16]
 set :puma_workers,    0
