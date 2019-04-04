@@ -6,12 +6,14 @@ before_script:
   - sleep 5
 script:
   - bundle exec rspec --pattern '**/*.spec.rb' --format d
-after_success:
-  - openssl aes-256-cbc -k $DEPLOY_KEY -in config/server_key_enc -d -a -out config/server_key
-  - eval "$(ssh-agent -s)"
-  - chmod 600 config/server_key
-  - ssh-add config/server_key
-  - bundle exec cap production deploy
+before_deploy:
+  - ./config/cap_deploy_prepare.sh
+deploy:
+  provider: script
+  script: config/cap_deploy.sh
+  on:
+    branch: master
+
 after_script:
   - docker-compose down
 env:
