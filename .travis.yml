@@ -6,15 +6,8 @@ before_script:
   - sleep 5
 script:
   - bundle exec rspec --pattern '**/*.spec.rb' --format d
-before_deploy:
-  - ./config/cap_deploy_prepare.sh
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: bash config/cap_deploy.sh
-  on:
-    branch: master
-
+after_success:
+  - ./config/cap_deploy.sh master
 after_script:
   - docker-compose down
 env:
