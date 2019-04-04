@@ -10,6 +10,7 @@ before_deploy:
   - ./config/cap_deploy_prepare.sh
 deploy:
   provider: script
+  skip_cleanup: true
   script: config/cap_deploy.sh
   on:
     branch: master
