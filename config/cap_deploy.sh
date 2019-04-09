@@ -10,4 +10,7 @@ ssh-add config/server_key
 bundle exec cap production deploy:check
 bundle exec cap production deploy
 
+ssh ec2-user@${DEPLOY_HOST} mkdir -p /var/www/gamescripter/extra
+rsync --delete -azhv coverage/ ec2-user@${DEPLOY_HOST}:/var/www/gamescripter/extra/coverage/
+
 echo "======== Deploy success =========="

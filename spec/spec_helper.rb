@@ -15,6 +15,8 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 ENV['APP_ENV'] ||= 'test'
 
+require 'simplecov'
+
 require 'rack/test'
 ENV['RACK_ENV'] = 'test'
 

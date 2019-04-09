@@ -22,6 +22,7 @@ group :test do
   gem 'rspec-json_expectations'
   gem 'rspec-collection_matchers'
   gem 'rack-test'
+  gem 'simplecov', require: false
 end
 group :development do
   gem "capistrano", "~> 3.10", require: false
