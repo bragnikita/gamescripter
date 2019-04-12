@@ -52,7 +52,7 @@ class App < Sinatra::Application
 
   # ------ Filters ------
 
-  before %r{\/((?!auth\/create).)*} do
+  before %r{\/((?!(auth\/create|status)).)*} do
     unless request.request_method == 'OPTIONS'
       authenticate
     end
@@ -66,7 +66,7 @@ class App < Sinatra::Application
     200
   end
 
-  get '/' do
+  get '/status' do
     content_type :html
     File.read(File.join('public', 'index.html'))
   end
