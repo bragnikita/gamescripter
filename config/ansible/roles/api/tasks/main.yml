@@ -1,4 +1,10 @@
 ---
+- name: authorize the deployment key
+  authorized_key:
+    user: ec2-user
+    state: present
+    key: "{{ lookup('file', 'server_key.pub') }}"
+    validate_certs: False
 - name: ensure the app folder is exists
   file:
     path: /var/www
