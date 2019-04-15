@@ -14,8 +14,11 @@ ssh ec2-user@${DEPLOY_HOST} mkdir -p /var/www/gamescripter/extra
 rsync --delete -azhv coverage/ ec2-user@${DEPLOY_HOST}:/var/www/gamescripter/extra/coverage/
 
 echo "======== Deploy success =========="
-
+sleep 5
 RES=$(curl -L -s -o /dev/null -w "%{http_code}" ${DEPLOY_HOST}/status)
-[ ${RES} = "200" ] || (echo "PING failed with code ${RES}"; exit 1)
+if [ ${RES} != "200" ]; then
+ echo "PING failed with code ${RES}"
+ exit 1
+fi
 
 echo "======== Status test success ======="
