@@ -68,6 +68,7 @@ class App < Sinatra::Application
 
   get '/status' do
     content_type :html
+    User.find_by!({username: 'admin'})
     File.read(File.join('public', 'index.html'))
   end
 
