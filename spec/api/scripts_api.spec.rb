@@ -7,11 +7,8 @@ describe 'Scripts API', auth: 'admin' do
   content = 'Name: serif *emotion*'
 
   before(:all) {
-    Mongoid.client('default')[:scripts].delete_many
+    recreate_db
     @root = Category.where(title: 'root').first
-    unless @root
-      @root = Category.create!(title: 'root')
-    end
     @root_id = @root.id.to_s
   }
 
