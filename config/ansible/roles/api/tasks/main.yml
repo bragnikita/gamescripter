@@ -27,6 +27,7 @@
   template:
     src: nginx.conf.j2
     dest: /var/www/{{ app_name }}/nginx/nginx.conf
+  notify: restart nginx
 - name: link the nginx configuration file to nginx
   file:
     src: /var/www/{{ app_name }}/nginx/nginx.conf
