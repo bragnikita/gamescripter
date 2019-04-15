@@ -5,7 +5,7 @@ before_script:
   - docker-compose up -d
   - sleep 5
 script:
-  - bundle exec rspec --pattern '**/*.spec.rb' --format d --fail-fast 3
+  - bundle exec rspec --pattern '**/*.spec.rb' --format d --fail-fast=3
 after_success:
   - ./config/cap_deploy.sh master
 after_script:
