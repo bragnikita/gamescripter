@@ -1,4 +1,4 @@
-db = db.getSiblingDB('gamescripter-test');
+cdb = db.getSiblingDB('gamescripter-test');
 db.users.drop();
 db.categories.drop();
 db.sequences.drop();

@@ -23,8 +23,12 @@ class CategoriesService
     upper_parents
   end
 
-  def get(id)
-    category_doc = Category.find(id)
+  def get(id = "")
+    if id == ""
+      category_doc = Category.where(title: "root", parent_id: nil).first
+    else
+      category_doc = Category.find(id)
+    end
     nested_categories = category_doc.children
     hash = category_doc.as_json
     hash[:children] = nested_categories.map(&:as_json)
@@ -32,7 +36,7 @@ class CategoriesService
   end
 
   def all
-   Category.order_by(title: :asc)
+    Category.order_by(title: :asc)
   end
 
   def create(category)
@@ -41,7 +45,11 @@ class CategoriesService
         raise ObjectNotFound, 'Parent is not found'
       end
     end
-    Category.create!(category)
+    Category.create!(category
+                       .slice(:title, :description, :content_type, :parent_id)
+                       .merge({
+                                meta: { :story_type => category[:story_type] }
+                              }))
   end
 
   def update(id, category)

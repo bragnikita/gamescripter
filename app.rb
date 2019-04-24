@@ -77,6 +77,10 @@ class App < Sinatra::Application
     json categories.get_parents id
   end
 
+  get '/category/root' do
+    json categories.get("")
+  end
+
   get '/category/:id' do |id|
     json categories.get(id)
   end
