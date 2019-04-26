@@ -53,7 +53,11 @@ class CategoriesService
   end
 
   def update(id, category)
-    Category.find(id).update_attributes!(category)
+    c = Category.find(id)
+    cm = category.slice(:title, :description, :content_type)
+    meta = c.meta ? c.meta.deep_merge(category.fetch(:meta, {})) : category.meta
+    cm[:meta] = meta
+    c.update_attributes!(cm)
   end
 
   def delete(id)

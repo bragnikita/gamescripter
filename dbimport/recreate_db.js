@@ -36,9 +36,21 @@ db.categories.insert([
         parent_id: null,
         created_at: new Date(),
         creator_id: rootId,
-        meta: {}
+        meta: {},
+        content_type: 'general'
     }
 ]);
+var catRoot = db.categories.findOne({title: 'root'});
+db.categories.insert([{
+    key: 1,
+    title: 'Main story',
+    description: 'Main story #1',
+    parent_id: catRoot['_id'],
+    created_at: new Date(),
+    creator_id: rootId,
+    meta: {story_type: 'main'},
+    content_type: 'story'
+}]);
 db.sequences.insert([
     {name: 'categories', next_val: 1},
     {name: 'scripts', next_val: 0}

@@ -151,6 +151,10 @@ class App < Sinatra::Application
     json token: token
   end
 
+  get '/auth/account' do
+    json @user.as_json( { except: [:password_digest]} )
+  end
+
   # -------- Permissions -----
 
 

@@ -14,4 +14,7 @@ class Category
   has_many :scripts, class_name: 'Script', inverse_of: :category, dependent: :restrict_with_exception
 
   field :meta, type: Hash, default: {}
+
+  validates :title, presence: true, uniqueness: {scope: :parent}
+  validates :content_type, presence: true
 end
