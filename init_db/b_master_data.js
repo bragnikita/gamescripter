@@ -91,3 +91,9 @@ db.dictionaries.insert([
         records: story_types.map(mapDict)
     }
 ]);
+
+db.settings.insert({
+    preview: {
+        css_uri: "/public/assets/preview.css"
+    }
+});

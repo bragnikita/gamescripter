@@ -15,6 +15,7 @@ server {
 	}
 	
         location / {
+            root /var/www/{{ app_name }}/current/public;
             try_files $uri @api;
         }
         location @api {

@@ -15,6 +15,7 @@ require './lib/database'
 require './lib/categories_service'
 require './lib/scripts_service'
 require './lib/services'
+require './lib/models/settings'
 require './lib/errors'
 require './lib/utils'
 require './lib/configuration'
@@ -52,7 +53,7 @@ class App < Sinatra::Application
 
   # ------ Filters ------
 
-  before %r{\/((?!(auth\/create|status)).)*} do
+  before %r{\/((?!(auth\/create|status|script\/.+\/preview)).)*} do
     unless request.request_method == 'OPTIONS'
       authenticate
     end
@@ -175,17 +176,22 @@ class App < Sinatra::Application
   end
 
   put '/script/:id/content/save' do |id|
-    scripts.save_content(id, body_as_string)
+    scripts.save_content(id, parse_body[:content])
     200
   end
 
   put '/script/:id/content/update' do |id|
-    scripts.update_content(id, body_as_string)
+    scripts.update_content(id, parse_body[:content])
     200
   end
 
   get '/script/:id/preview' do |id|
-    scripts.get_html(id)
+    settings = Settings.first
+    res = erb 'preview.html'.to_sym, :locals => {
+      html_preview: scripts.get_html(id),
+      options: settings.preview
+    }
+    [200, {'Content-Type'=>'text/html; charset=utf-8', "X-XSS-Protection"=>"0"}, res]
   end
 
   post '/script/:id/images' do

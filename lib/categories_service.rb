@@ -32,6 +32,7 @@ class CategoriesService
     nested_categories = category_doc.children
     hash = category_doc.as_json
     hash[:children] = nested_categories.map(&:as_json)
+    hash[:scripts] = category_doc.scripts.map { |s| s.as_json(except: [:source, :html])}
     hash
   end
 

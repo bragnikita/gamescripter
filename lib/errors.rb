@@ -20,3 +20,9 @@ class AuthError < ClientError
     super(msg, code)
   end
 end
+
+class ScriptProcessingError < ClientError
+  def initialize(msg = '', code=422)
+    super(msg, code)
+  end
+end

@@ -47,7 +47,7 @@ class UsersService
     else
       filter = { only: public_params }
     end
-    User.find(id).as_json(filter)
+    User.find(id).as_json(filt er)
   end
 
   def delete(id)
