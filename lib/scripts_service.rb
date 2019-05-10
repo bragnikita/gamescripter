@@ -37,6 +37,7 @@ class ScriptOperations
       io.write content
       io.rewind
       html = stack.create_task.process(io)
+      script.update_attributes!(html: html)
       return html
     rescue GamescriptCreator::ScriptParserError => e
       raise ScriptProcessingError.new(e.message)
@@ -45,12 +46,12 @@ class ScriptOperations
     end
   end
 
-  def preview(id, content)
+  def preview(content)
     version = content[:version]
     stack = GamescriptCreator::build_stack (version || @default_script_version)
-    io = Tempfile.new(id)
+    io = Tempfile.new("script_preview", :encoding => 'UTF-8')
     begin
-      io.write content[:text]
+      io.write content[:source]
       io.rewind
       html = stack.create_task.process(io)
       return html

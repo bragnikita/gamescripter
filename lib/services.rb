@@ -105,6 +105,7 @@ class DictionariesService
 
 end
 
+
 def filter(params_hash = {}, *allowed_keys)
   res = {}
   allowed_keys.each do |key|

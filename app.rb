@@ -53,8 +53,16 @@ class App < Sinatra::Application
 
   # ------ Filters ------
 
-  before %r{\/((?!(auth\/create|status|script\/.+\/preview)).)*} do
-    unless request.request_method == 'OPTIONS'
+  before do
+    path = request.path
+    unless path.start_with?('/auth/') ||
+      path.start_with?('/status') ||
+      path.match(/script\/.+\/preview$/) ||
+      path == '/favicon.ico' ||
+      path.start_with?('/reading/') ||
+      path.start_with?('/dictionaries') ||
+      request.request_method == 'OPTIONS'
+
       authenticate
     end
   end
@@ -113,6 +121,14 @@ class App < Sinatra::Application
     200
   end
 
+  get '/reading/c/:id/display' do |id|
+    json categories.create_category_view(id == 'root' ? '' : id)
+  end
+
+  get '/reading/c/filter' do
+    json categories.filter_category params.to_h
+  end
+
   # -------- Users ---------
 
   post '/users' do
@@ -153,7 +169,12 @@ class App < Sinatra::Application
   end
 
   get '/auth/account' do
-    json @user.as_json( { except: [:password_digest]} )
+    begin
+      authenticate
+      json @user.as_json({ except: [:password_digest] })
+    rescue AuthError
+      json :code => 'not_authenticated'
+    end
   end
 
   # -------- Permissions -----
@@ -176,22 +197,19 @@ class App < Sinatra::Application
   end
 
   put '/script/:id/content/save' do |id|
-    scripts.save_content(id, parse_body[:content])
+    scripts.save_content(id, parse_body[:source])
     200
   end
 
   put '/script/:id/content/update' do |id|
-    scripts.update_content(id, parse_body[:content])
+    scripts.update_content(id, parse_body[:source])
     200
   end
 
-  get '/script/:id/preview' do |id|
+  post '/script/preview' do ||
     settings = Settings.first
-    res = erb 'preview.html'.to_sym, :locals => {
-      html_preview: scripts.get_html(id),
-      options: settings.preview
-    }
-    [200, {'Content-Type'=>'text/html; charset=utf-8', "X-XSS-Protection"=>"0"}, res]
+    html = scripts.preview(parse_body)
+    [200, { 'Content-Type' => 'text/html; charset=utf-8', "X-XSS-Protection" => "0" }, html]
   end
 
   post '/script/:id/images' do

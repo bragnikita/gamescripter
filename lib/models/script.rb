@@ -9,6 +9,7 @@ class Script
   field :version, type: String
   field :attachments_path, type: String
   field :meta, type: Hash, default: {}
+  field :type, type: String, default: ""
 
   embeds_many :images
 

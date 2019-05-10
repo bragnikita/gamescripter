@@ -47,7 +47,7 @@ class CategoriesService
       end
     end
     Category.create!(category
-                       .slice(:title, :description, :content_type, :parent_id)
+                       .slice(:title, :description, :subtitle, :content_type, :parent_id)
                        .merge({
                                 meta: { :story_type => category[:story_type] }
                               }))
@@ -55,7 +55,7 @@ class CategoriesService
 
   def update(id, category)
     c = Category.find(id)
-    cm = category.slice(:title, :description, :content_type)
+    cm = category.slice(:title, :subtitle, :description, :content_type)
     meta = c.meta ? c.meta.deep_merge(category.fetch(:meta, {})) : category.meta
     cm[:meta] = meta
     c.update_attributes!(cm)
@@ -63,6 +63,25 @@ class CategoriesService
 
   def delete(id)
     Category.find(id).destroy!
+  end
+
+  def filter_category(filter = {})
+    Category.where(filter).order_by(index: 1).map(&:as_json)
+  end
+
+  def create_category_view(category_id)
+    if category_id == ""
+      category_doc = Category.where(title: "root", parent_id: nil).first
+    else
+      category_doc = Category.find(category_id)
+    end
+
+    nested_categories = category_doc.children
+    hash = category_doc.as_json
+    hash[:children] = nested_categories.map(&:as_json)
+    hash[:scripts] = category_doc.scripts.sort_by(&:index).map { |s| s.as_json(except: [:source])}
+    hash
+
   end
 
   private
