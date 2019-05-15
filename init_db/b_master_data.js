@@ -1,4 +1,4 @@
-db = db.getSiblingDB('gamescripter-test');
+cdb = db.getSiblingDB('gamescripter-test');
 db.users.drop();
 db.categories.drop();
 db.sequences.drop();
@@ -91,3 +91,9 @@ db.dictionaries.insert([
         records: story_types.map(mapDict)
     }
 ]);
+
+db.settings.insert({
+    preview: {
+        css_uri: "/public/assets/preview.css"
+    }
+});

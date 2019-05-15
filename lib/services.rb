@@ -47,7 +47,7 @@ class UsersService
     else
       filter = { only: public_params }
     end
-    User.find(id).as_json(filter)
+    User.find(id).as_json(filt er)
   end
 
   def delete(id)
@@ -104,6 +104,7 @@ class DictionariesService
   end
 
 end
+
 
 def filter(params_hash = {}, *allowed_keys)
   res = {}

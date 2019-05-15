@@ -15,6 +15,7 @@ require './lib/database'
 require './lib/categories_service'
 require './lib/scripts_service'
 require './lib/services'
+require './lib/models/settings'
 require './lib/errors'
 require './lib/utils'
 require './lib/configuration'
@@ -52,8 +53,16 @@ class App < Sinatra::Application
 
   # ------ Filters ------
 
-  before %r{\/((?!(auth\/create|status)).)*} do
-    unless request.request_method == 'OPTIONS'
+  before do
+    path = request.path
+    unless path.start_with?('/auth/') ||
+      path.start_with?('/status') ||
+      path.match(/script\/.+\/preview$/) ||
+      path == '/favicon.ico' ||
+      path.start_with?('/reading/') ||
+      path.start_with?('/dictionaries') ||
+      request.request_method == 'OPTIONS'
+
       authenticate
     end
   end
@@ -76,6 +85,10 @@ class App < Sinatra::Application
   #
   get '/category/:id/parents' do |id|
     json categories.get_parents id
+  end
+
+  get '/category/root' do
+    json categories.get("")
   end
 
   get '/category/:id' do |id|
@@ -107,6 +120,14 @@ class App < Sinatra::Application
     # data[:key] = params[:id]
     categories.update(params[:id], data)
     200
+  end
+
+  get '/reading/c/:id/display' do |id|
+    json categories.create_category_view(id == 'root' ? '' : id)
+  end
+
+  get '/reading/c/filter' do
+    json categories.filter_category params.to_h
   end
 
   # -------- Users ---------
@@ -148,6 +169,15 @@ class App < Sinatra::Application
     json token: token
   end
 
+  get '/auth/account' do
+    begin
+      authenticate
+      json @user.as_json({ except: [:password_digest] })
+    rescue
+      json :code => 'not_authenticated'
+    end
+  end
+
   # -------- Permissions -----
 
 
@@ -162,23 +192,30 @@ class App < Sinatra::Application
     json scripts.create(parse_body)
   end
 
+  delete '/script/:id' do |id|
+    scripts.delete(id)
+    200
+  end
+
   put '/script/:id' do |id|
     scripts.update(id, parse_body)
     200
   end
 
   put '/script/:id/content/save' do |id|
-    scripts.save_content(id, body_as_string)
+    scripts.save_content(id, parse_body[:source])
     200
   end
 
   put '/script/:id/content/update' do |id|
-    scripts.update_content(id, body_as_string)
+    scripts.update_content(id, parse_body[:source])
     200
   end
 
-  get '/script/:id/preview' do |id|
-    scripts.get_html(id)
+  post '/script/preview' do ||
+    settings = Settings.first
+    html = scripts.preview(parse_body)
+    [200, { 'Content-Type' => 'text/html; charset=utf-8', "X-XSS-Protection" => "0" }, html]
   end
 
   post '/script/:id/images' do

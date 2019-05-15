@@ -23,16 +23,21 @@ class CategoriesService
     upper_parents
   end
 
-  def get(id)
-    category_doc = Category.find(id)
+  def get(id = "")
+    if id == ""
+      category_doc = Category.where(title: "root", parent_id: nil).first
+    else
+      category_doc = Category.find(id)
+    end
     nested_categories = category_doc.children
     hash = category_doc.as_json
     hash[:children] = nested_categories.map(&:as_json)
+    hash[:scripts] = category_doc.scripts.map { |s| s.as_json(except: [:source, :html])}
     hash
   end
 
   def all
-   Category.order_by(title: :asc)
+    Category.order_by(title: :asc)
   end
 
   def create(category)
@@ -41,15 +46,42 @@ class CategoriesService
         raise ObjectNotFound, 'Parent is not found'
       end
     end
-    Category.create!(category)
+    Category.create!(category
+                       .slice(:title, :description, :subtitle, :content_type, :parent_id)
+                       .merge({
+                                meta: { :story_type => category[:story_type] }
+                              }))
   end
 
   def update(id, category)
-    Category.find(id).update_attributes!(category)
+    c = Category.find(id)
+    cm = category.slice(:title, :subtitle, :description, :content_type)
+    meta = c.meta ? c.meta.deep_merge(category.fetch(:meta, {})) : category.meta
+    cm[:meta] = meta
+    c.update_attributes!(cm)
   end
 
   def delete(id)
     Category.find(id).destroy!
+  end
+
+  def filter_category(filter = {})
+    Category.where(filter).order_by(index: 1).map(&:as_json)
+  end
+
+  def create_category_view(category_id)
+    if category_id == ""
+      category_doc = Category.where(title: "root", parent_id: nil).first
+    else
+      category_doc = Category.find(category_id)
+    end
+
+    nested_categories = category_doc.children
+    hash = category_doc.as_json
+    hash[:children] = nested_categories.map(&:as_json)
+    hash[:scripts] = category_doc.scripts.sort_by(&:index).map { |s| s.as_json(except: [:source])}
+    hash
+
   end
 
   private

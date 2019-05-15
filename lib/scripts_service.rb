@@ -21,7 +21,7 @@ class ScriptOperations
   end
 
   def delete(id)
-    Script.params.find(id).destroy!
+    Script.find(id).destroy!
   end
 
   def save_content(id, content)
@@ -32,12 +32,31 @@ class ScriptOperations
     script = Script.find(id)
     script.update_attributes!(source: content)
     stack = GamescriptCreator::build_stack (script.version || @default_script_version)
-    io = Tempfile.new('id')
+    io = Tempfile.new(id, :encoding => 'UTF-8')
     begin
       io.write content
       io.rewind
       html = stack.create_task.process(io)
       script.update_attributes!(html: html)
+      return html
+    rescue GamescriptCreator::ScriptParserError => e
+      raise ScriptProcessingError.new(e.message)
+    ensure
+      io && io.close && io.unlink
+    end
+  end
+
+  def preview(content)
+    version = content[:version]
+    stack = GamescriptCreator::build_stack (version || @default_script_version)
+    io = Tempfile.new("script_preview", :encoding => 'UTF-8')
+    begin
+      io.write content[:source]
+      io.rewind
+      html = stack.create_task.process(io)
+      return html
+    rescue GamescriptCreator::ScriptParserError => e
+      raise ScriptProcessingError.new(e.message)
     ensure
       io && io.close && io.unlink
     end

@@ -21,6 +21,9 @@ class Configuration
 
     check_vars 'APP_SECRET'
     configure_database
+    if env == 'development'
+      printConfig
+    end
     @configured = true
   end
 
@@ -72,6 +75,17 @@ class Configuration
       }
       config.log_level = :warn
     end
+  end
+
+  def printConfig
+    puts Mongoid.default_client.options[:user]
+    puts Mongoid.default_client.options[:password]
+    puts Mongoid.default_client.options[:database]
+    puts Mongoid.default_client.cluster.servers[0].address
+    puts self.app_root
+    puts self.posts_attachments_root
+    puts self.scripts_attachments_root
+    puts @env
   end
 
 end
