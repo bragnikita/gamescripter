@@ -21,7 +21,7 @@ class ScriptOperations
   end
 
   def delete(id)
-    Script.params.find(id).destroy!
+    Script.find(id).destroy!
   end
 
   def save_content(id, content)

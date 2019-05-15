@@ -172,7 +172,7 @@ class App < Sinatra::Application
     begin
       authenticate
       json @user.as_json({ except: [:password_digest] })
-    rescue AuthError
+    rescue
       json :code => 'not_authenticated'
     end
   end
@@ -189,6 +189,11 @@ class App < Sinatra::Application
 
   post '/scripts' do
     json scripts.create(parse_body)
+  end
+
+  delete '/script/:id' do |id|
+    scripts.delete(id)
+    200
   end
 
   put '/script/:id' do |id|
