@@ -40,7 +40,7 @@ describe 'Scripts API', auth: 'admin' do
       expect(sample_script.title).to eq('chapter 22')
     end
   end
-  describe 'PUT /script/:id/content/save' do
+  xdescribe 'PUT /script/:id/content/save' do
     before(:all) {
       @sample_script = Script.create!(category: @root, title: 'chapter 3', source: content)
       @sample_script_id = @sample_script.id.to_s
@@ -53,7 +53,7 @@ describe 'Scripts API', auth: 'admin' do
       expect(sample_script.html).to be_nil
     end
   end
-  describe 'PUT /script/:id/content/update' do
+  xdescribe 'PUT /script/:id/content/update' do
     before(:all) {
       @sample_script = Script.create!(category: @root, title: 'chapter 4', source: content)
       @sample_script_id = @sample_script.id.to_s
@@ -66,7 +66,7 @@ describe 'Scripts API', auth: 'admin' do
       expect(sample_script.html).to be_truthy
     end
   end
-  describe 'GET /script/:id/preview' do
+  xdescribe 'GET /script/:id/preview' do
     before(:all) {
       @sample_script = Script.create!(category: @root, title: 'chapter 5')
       @sample_script_id = @sample_script.id.to_s

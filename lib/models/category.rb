@@ -8,7 +8,7 @@ class Category
   field :title, type: String
   field :description, type: String
   field :index, type: Numeric
-  field :content_type, type: String
+  field :content_type, type: String,  default: 'general'
   field :subtitle, type: String
   belongs_to :parent, class_name: 'Category', inverse_of: :children, optional: true
   has_many :children, class_name: 'Category', inverse_of: :parent, dependent: :restrict_with_exception

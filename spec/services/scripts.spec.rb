@@ -46,7 +46,7 @@ describe ScriptOperations, :clear => [:scripts] do
     end
   end
 
-  describe '#update_content' do
+  xdescribe '#update_content' do
     let(:result) { service.update_content(script.id, load_fixture('source_script_1.txt')) }
     let(:reloaded) { Script.find(script.id) }
     it 'finishes without exceptions' do

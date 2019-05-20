@@ -36,7 +36,7 @@ describe CategoriesService, :clear => [:categories] do
     end
   end
 
-  describe '#create' do
+  xdescribe '#create' do
     describe 'when new category is creating' do
       let(:new_cat_attributes) { { title: 'new_category', parent: cat.id } }
       it 'creates new child of parent' do
