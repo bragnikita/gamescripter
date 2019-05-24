@@ -16,7 +16,7 @@ gem 'mongoid'
 gem 'puma'
 gem 'dotenv'
 gem 'jwt'
-gem 'gamescript_creator', git: 'https://github.com/bragnikita/gamescript_creator.git', branch: 'master'
+gem 'gamescript_creator', git: 'https://github.com/bragnikita/gamescript_creator.git', tag: '0.1.1'
 group :test do
   gem 'rspec'
   gem 'rspec-json_expectations'

@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/bragnikita/gamescript_creator.git
-  revision: cd460e1a4c877435e74b8c1a7dd02d5ebcf3dea8
-  branch: master
+  revision: 4814641baa403a03eba13aeaecb786e4520ab20a
+  tag: 0.1.1
   specs:
     gamescript_creator (0.1.0)
       htmlbeautifier (~> 1.3.0)
