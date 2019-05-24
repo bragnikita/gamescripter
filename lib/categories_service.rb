@@ -47,7 +47,12 @@ class CategoriesService
       end
     end
     Category.create!(category
-                       .slice(:title, :description, :subtitle, :content_type, :parent_id)
+                       .slice(:title,
+                              :subtitle,
+                              :description,
+                              :content_type,
+                              :resources_prefix,
+                              :parent_id)
                        .merge({
                                 meta: { :story_type => category[:story_type] }
                               }))
@@ -55,7 +60,11 @@ class CategoriesService
 
   def update(id, category)
     c = Category.find(id)
-    cm = category.slice(:title, :subtitle, :description, :content_type)
+    cm = category.slice(:title,
+                        :subtitle,
+                        :description,
+                        :content_type,
+                        :resources_prefix)
     meta = c.meta ? c.meta.deep_merge(category.fetch(:meta, {})) : category.meta
     cm[:meta] = meta
     c.update_attributes!(cm)
