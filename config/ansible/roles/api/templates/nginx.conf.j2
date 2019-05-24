@@ -3,17 +3,26 @@ upstream upstream_{{ app_name }} {
 }
 
 server {
+       listen 80;
+       server_name files.{{server_name}};
+       location / {
+          root /var/www/public/{{ app_name }};
+          autoindex on;
+       }
+}
+
+server {
         listen 80;
-        server_name localhost;
+        server_name api.{{server_name}} "";
 
         access_log  /var/www/{{ app_name }}/shared/log/nginx-access.log  main;
         error_log  /var/www/{{ app_name }}/shared/log/nginx-error.log;
 	
-	location /extra/coverage {
-		alias /var/www/{{ app_name }}/extra/coverage;
-		index index.html;
-	}
-	
+	    location /extra/coverage {
+		    alias /var/www/{{ app_name }}/extra/coverage;
+		    index index.html;
+	    }
+
         location / {
             root /var/www/{{ app_name }}/current/public;
             try_files $uri @api;
